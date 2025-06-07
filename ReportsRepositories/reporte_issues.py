@@ -28,14 +28,18 @@ BASE_URL = f"https://github.com/{REPO}"
 # Importaciones opcionales para generación de PDF
 PDF_DISPONIBLE = False
 try:
-    # Solo verificamos si markdown2 está disponible al inicio
+    # Solo verificamos si las dependencias están disponibles al inicio
     import markdown2
-    # WeasyPrint se importará solo cuando sea necesario
+    import reportlab
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.platypus import SimpleDocTemplate, Paragraph
     PDF_DISPONIBLE = os.getenv("ENABLE_PDF", "").lower() == "true"
 except ImportError:
     print("Nota: Algunas dependencias para generar PDF no están disponibles.")
-    print("Para instalar todas las dependencias en Windows, consulte:")
-    print("WEASYPRINT_INSTRUCCIONES.md")
+    print("Para instalar las dependencias necesarias ejecute:")
+    print("pip install reportlab markdown2")
 
 def obtener_issues_y_prs():
     resultados = []
@@ -129,24 +133,58 @@ def generar_markdown(filas):
 def generar_pdf_desde_markdown():
     if not PDF_DISPONIBLE:
         print("No se puede generar PDF: Faltan dependencias necesarias.")
-        print("Consulta el archivo WEASYPRINT_INSTRUCCIONES.md para más información.")
+        print("Consulta el archivo REPORTLAB_INSTRUCCIONES.md para más información.")
         return
         
     try:
-        # Importar WeasyPrint solo cuando sea necesario
-        from weasyprint import HTML
-        
         # Crear directorio de reportes si no existe
         carpeta_reportes = "reportes"
         os.makedirs(carpeta_reportes, exist_ok=True)
         
+        # Leer el archivo markdown
         with open(os.path.join(carpeta_reportes, "reporte_completo.md"), "r", encoding="utf-8") as f:
-            html = markdown2.markdown(f.read())
-        HTML(string=html).write_pdf(os.path.join(carpeta_reportes, "reporte_completo.pdf"))
+            md_text = f.read()
+            
+        # Convertir markdown a HTML
+        html = markdown2.markdown(md_text)
+        
+        # Crear un documento PDF
+        pdf_path = os.path.join(carpeta_reportes, "reporte_completo.pdf")
+        doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+        
+        # Estilos para el PDF
+        styles = getSampleStyleSheet()
+        story = []
+        
+        # Extraer texto del HTML (esto es simplificado, idealmente se procesaría mejor el HTML)
+        import re
+        # Eliminar etiquetas HTML básicas
+        text = re.sub(r'<[^>]*>', '', html)
+        
+        # Dividir en líneas para procesar
+        lines = text.split('\n')
+        for line in lines:
+            if line.strip():
+                # Distinguir entre títulos y contenido regular
+                if line.startswith('# '):
+                    # Título principal
+                    story.append(Paragraph(line[2:], styles['Title']))
+                elif line.startswith('## '):
+                    # Subtítulo
+                    story.append(Paragraph(line[3:], styles['Heading2']))
+                elif line.startswith('### '):
+                    # Sub-subtítulo
+                    story.append(Paragraph(line[4:], styles['Heading3']))
+                else:
+                    # Contenido regular
+                    story.append(Paragraph(line, styles['Normal']))
+                    
+        # Construir el PDF
+        doc.build(story)
         return True
     except Exception as e:
         print(f"Error al generar PDF: {str(e)}")
-        print("Consulta el archivo WEASYPRINT_INSTRUCCIONES.md para más información.")
+        print("Consulta el archivo REPORTLAB_INSTRUCCIONES.md para más información.")
         return False
 
 def procesar_reporte(issues, commits):

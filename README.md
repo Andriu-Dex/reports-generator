@@ -29,8 +29,10 @@ Este script genera reportes detallados de issues y pull requests de un repositor
    pip install -r requirements.txt
    ```
 
-3. Para generar PDFs (opcional), instala WeasyPrint siguiendo las instrucciones en:
-   https://doc.courtbouillon.org/weasyprint/stable/first_steps.html
+3. Para generar PDFs (opcional), instala ReportLab:
+   ```
+   pip install reportlab markdown2
+   ```
 
 ## Configuración
 
@@ -59,4 +61,4 @@ El script generará tres archivos en la carpeta `reportes`:
 ## Notas
 
 - Asegúrate de que tu token de GitHub tenga los permisos necesarios para acceder al repositorio.
-- Si encuentras problemas con la generación de PDFs, revisa las instrucciones de instalación de WeasyPrint para tu sistema operativo.
+- Si encuentras problemas con la generación de PDFs, revisa las instrucciones de instalación de ReportLab en el archivo `REPORTLAB_INSTRUCCIONES.md`.
