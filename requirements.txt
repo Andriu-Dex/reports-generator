@@ -3,4 +3,12 @@ pandas
 python-dotenv
 markdown2
 reportlab
+pillow
+ttkthemes
+customtkinter
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.0.0
+numpy
+openpyxl
 # Tkinter generalmente ya viene instalado con Python, pero lo incluimos como referencia
