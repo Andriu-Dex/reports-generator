@@ -28,3 +28,6 @@ ENV/
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db
+
+# Archivos de documentación generados
+**/reportes/
