@@ -28,13 +28,14 @@ BASE_URL = f"https://github.com/{REPO}"
 # Importaciones opcionales para generación de PDF
 PDF_DISPONIBLE = False
 try:
+    # Solo verificamos si markdown2 está disponible al inicio
     import markdown2
-    from weasyprint import HTML
-    PDF_DISPONIBLE = True
+    # WeasyPrint se importará solo cuando sea necesario
+    PDF_DISPONIBLE = os.getenv("ENABLE_PDF", "").lower() == "true"
 except ImportError:
     print("Nota: Algunas dependencias para generar PDF no están disponibles.")
-    print("Para instalar todas las dependencias en Windows, siga las instrucciones en:")
-    print("https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#windows")
+    print("Para instalar todas las dependencias en Windows, consulte:")
+    print("WEASYPRINT_INSTRUCCIONES.md")
 
 def obtener_issues_y_prs():
     resultados = []
@@ -85,10 +86,18 @@ def obtener_comentarios(numero):
     return ""
 
 def generar_excel(filas):
+    # Crear directorio de reportes si no existe
+    carpeta_reportes = "reportes"
+    os.makedirs(carpeta_reportes, exist_ok=True)
+    
     df = pd.DataFrame(filas)
-    df.to_excel("reporte_completo.xlsx", index=False)
+    df.to_excel(os.path.join(carpeta_reportes, "reporte_completo.xlsx"), index=False)
 
 def generar_markdown(filas):
+    # Crear directorio de reportes si no existe
+    carpeta_reportes = "reportes"
+    os.makedirs(carpeta_reportes, exist_ok=True)
+    
     markdown = "# Reporte de Issues y Pull Requests\n\n"
     for item in filas:
         markdown += f"""
@@ -114,17 +123,31 @@ def generar_markdown(filas):
 ---
 
 """
-    with open("reporte_completo.md", "w", encoding="utf-8") as f:
+    with open(os.path.join(carpeta_reportes, "reporte_completo.md"), "w", encoding="utf-8") as f:
         f.write(markdown)
 
 def generar_pdf_desde_markdown():
     if not PDF_DISPONIBLE:
         print("No se puede generar PDF: Faltan dependencias necesarias.")
+        print("Consulta el archivo WEASYPRINT_INSTRUCCIONES.md para más información.")
         return
         
-    with open("reporte_completo.md", "r", encoding="utf-8") as f:
-        html = markdown2.markdown(f.read())
-    HTML(string=html).write_pdf("reporte_completo.pdf")
+    try:
+        # Importar WeasyPrint solo cuando sea necesario
+        from weasyprint import HTML
+        
+        # Crear directorio de reportes si no existe
+        carpeta_reportes = "reportes"
+        os.makedirs(carpeta_reportes, exist_ok=True)
+        
+        with open(os.path.join(carpeta_reportes, "reporte_completo.md"), "r", encoding="utf-8") as f:
+            html = markdown2.markdown(f.read())
+        HTML(string=html).write_pdf(os.path.join(carpeta_reportes, "reporte_completo.pdf"))
+        return True
+    except Exception as e:
+        print(f"Error al generar PDF: {str(e)}")
+        print("Consulta el archivo WEASYPRINT_INSTRUCCIONES.md para más información.")
+        return False
 
 def procesar_reporte(issues, commits):
     filas = []
@@ -166,9 +189,15 @@ if __name__ == "__main__":
 
     generar_excel(filas)
     generar_markdown(filas)
-    generar_pdf_desde_markdown()
-
-    print("✅ Archivos generados:")
-    print("- reporte_completo.xlsx")
-    print("- reporte_completo.md")
-    print("- reporte_completo.pdf")
+    
+    if PDF_DISPONIBLE:
+        generar_pdf_desde_markdown()
+        print("✅ Archivos generados:")
+        print("- reportes/reporte_completo.xlsx")
+        print("- reportes/reporte_completo.md")
+        print("- reportes/reporte_completo.pdf")
+    else:
+        print("✅ Archivos generados:")
+        print("- reportes/reporte_completo.xlsx")
+        print("- reportes/reporte_completo.md")
+        print("⚠️ El archivo PDF no se generó debido a que falta instalar WeasyPrint.")

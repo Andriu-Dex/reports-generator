@@ -50,7 +50,7 @@ cd ReportsRepositories
 python reporte_issues.py
 ```
 
-El script generará tres archivos:
+El script generará tres archivos en la carpeta `reportes`:
 
 - `reporte_completo.xlsx`: Reporte en formato Excel
 - `reporte_completo.md`: Reporte en formato Markdown
