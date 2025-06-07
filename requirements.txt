@@ -3,3 +3,4 @@ pandas
 python-dotenv
 markdown2
 reportlab
+# Tkinter generalmente ya viene instalado con Python, pero lo incluimos como referencia

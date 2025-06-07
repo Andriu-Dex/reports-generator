@@ -8,6 +8,7 @@ Este script genera reportes detallados de issues y pull requests de un repositor
 - Vincula commits relacionados
 - Incluye comentarios de cada issue
 - Genera reportes en formato Excel, Markdown y PDF (opcional)
+- Interfaz gráfica para facilitar su uso
 
 ## Requisitos
 
@@ -46,6 +47,23 @@ Este script genera reportes detallados de issues y pull requests de un repositor
    Puedes obtener un token de GitHub en: https://github.com/settings/tokens
 
 ## Uso
+
+### Interfaz Gráfica
+
+Para iniciar la aplicación con interfaz gráfica, ejecute:
+
+```
+# En Windows - Con batch
+iniciar_app.bat
+
+# En Windows - Con PowerShell
+.\iniciar_app.ps1
+
+# Manualmente
+python ReportsRepositories\app_gui.py
+```
+
+### Línea de Comandos
 
 ```
 cd ReportsRepositories
